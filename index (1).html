@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Everse SMP — RPG & Politik</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080b10;
+    --bg2: #0d1117;
+    --gold: #c9922a;
+    --gold2: #e8b84b;
+    --gold-pale: #f0d080;
+    --red: #8b1a1a;
+    --red2: #c0392b;
+    --stone: #1e2530;
+    --stone2: #252d3a;
+    --text: #d4c9b0;
+    --text2: #8a7f6e;
+    --white: #f5f0e8;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 18px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 5%;
+    background: linear-gradient(180deg, rgba(8,11,16,0.97) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(201,146,42,0.1);
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.3rem;
+    letter-spacing: 0.12em;
+    color: var(--gold2);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--text2); font-weight: 400; font-size: 0.75rem; display: block; letter-spacing: 0.25em; margin-top: -2px; }
+
+  .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text2);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .nav-links a:hover { color: var(--gold2); }
+
+  .nav-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 9px 22px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+  }
+  .nav-btn:hover { background: var(--gold); color: var(--bg); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+    padding: 0 5%;
+    overflow: hidden;
+  }
+
+  /* animated background grid */
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(201,146,42,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,146,42,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: gridDrift 30s linear infinite;
+  }
+  @keyframes gridDrift {
+    from { transform: translateY(0); }
+    to { transform: translateY(60px); }
+  }
+
+  /* radial glow */
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 30%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(139,26,26,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,146,42,0.3);
+    padding: 6px 20px;
+    margin-bottom: 2.5rem;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s ease forwards;
+  }
+
+  .hero-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: clamp(3.5rem, 9vw, 7.5rem);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    color: var(--white);
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.4s ease forwards;
+  }
+
+  .hero-title .accent { color: var(--gold2); }
+  .hero-title .sub { 
+    display: block; 
+    font-size: 0.35em; 
+    letter-spacing: 0.4em; 
+    color: var(--text2);
+    font-weight: 400;
+    margin-top: 0.8em;
+  }
+
+  .hero-desc {
+    max-width: 560px;
+    font-size: 1.15rem;
+    color: var(--text);
+    font-style: italic;
+    margin: 2.2rem auto 3rem;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.6s ease forwards;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    position: relative;
+    z-index: 1;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.8s ease forwards;
+  }
+
+  .btn-primary {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold2) 100%);
+    color: #0a0800;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .btn-primary:hover { filter: brightness(1.15); transform: translateY(-2px); }
+
+  .btn-secondary {
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 14px 36px;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid rgba(212,201,176,0.25);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+  .btn-secondary:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* scroll indicator */
+  .scroll-hint {
+    position: absolute;
+    bottom: 36px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--text2);
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    animation: fadeUp 1s 1.2s ease forwards;
+    opacity: 0;
+  }
+  .scroll-hint .line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(var(--gold), transparent);
+    animation: scrollLine 2s ease infinite;
+  }
+  @keyframes scrollLine {
+    0% { transform: scaleY(0); transform-origin: top; }
+    50% { transform: scaleY(1); transform-origin: top; }
+    51% { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── DIVIDER ── */
+  .ornament {
+    text-align: center;
+    padding: 3rem 0;
+    color: var(--gold);
+    font-size: 1.1rem;
+    letter-spacing: 0.5em;
+    opacity: 0.5;
+  }
+
+  /* ── SERVER INFO ── */
+  .section {
+    padding: 80px 5%;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    color: var(--white);
+    line-height: 1.15;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── IP CARD ── */
+  .ip-section {
+    background: var(--bg);
+    padding: 80px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ip-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(201,146,42,0.05) 0%, transparent 60%);
+  }
+
+  .ip-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    max-width: 800px;
+    margin: 3rem auto 0;
+    border: 1px solid rgba(201,146,42,0.15);
+  }
+
+  .ip-card {
+    background: var(--stone);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .ip-card:hover { background: var(--stone2); }
+
+  .ip-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--gold);
+  }
+
+  .ip-card-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.8rem;
+  }
+
+  .ip-card-value {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 0.4rem;
+  }
+
+  .ip-card-note {
+    font-size: 0.85rem;
+    color: var(--text2);
+    font-style: italic;
+  }
+
+  .coming-soon-badge {
+    display: inline-block;
+    background: rgba(201,146,42,0.1);
+    border: 1px solid rgba(201,146,42,0.3);
+    color: var(--gold2);
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    padding: 4px 12px;
+    margin-top: 8px;
+    animation: pulse 2.5s ease infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+  }
+
+  .platform-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .platform-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    border: 1px solid rgba(201,146,42,0.2);
+    padding: 10px 20px;
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    color: var(--text);
+  }
+
+  .platform-pill .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--gold2);
+  }
+
+  /* ── FEATURES ── */
+  .features-section {
+    padding: 100px 5%;
+    background: linear-gradient(180deg, var(--bg) 0%, #0a0e15 100%);
+  }
+
+  .features-header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 5rem;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .feature-card {
+    background: var(--stone);
+    padding: 2.5rem;
+    position: relative;
+    transition: background 0.3s, transform 0.3s;
+    overflow: hidden;
+  }
+
+  .feature-card:hover {
+    background: var(--stone2);
+    transform: translateY(-4px);
+  }
+
+  .feature-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .feature-card:hover::after { opacity: 1; }
+
+  .feature-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+    display: block;
+    filter: sepia(1) saturate(2) hue-rotate(5deg);
+  }
+
+  .feature-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    margin-bottom: 0.8rem;
+  }
+
+  .feature-desc {
+    font-size: 0.95rem;
+    color: var(--text2);
+    line-height: 1.65;
+  }
+
+  /* ── ABOUT / THEME ── */
+  .about-section {
+    padding: 100px 5%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .about-section::before {
+    content: '';
+    position: absolute;
+    right: -200px; top: 50%;
+    transform: translateY(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(ellipse, rgba(139,26,26,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .about-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: center;
+  }
+
+  .about-text p {
+    color: var(--text);
+    margin-bottom: 1.2rem;
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+
+  .stat-box {
+    background: var(--stone);
+    padding: 2rem;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-family: 'Cinzel', serif;
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: var(--gold2);
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+
+  .stat-label {
+    font-size: 0.8rem;
+    color: var(--text2);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: 'Cinzel', serif;
+  }
+
+  /* ── RULES STRIP ── */
+  .rules-strip {
+    background: var(--stone);
+    border-top: 1px solid rgba(201,146,42,0.1);
+    border-bottom: 1px solid rgba(201,146,42,0.1);
+    padding: 60px 5%;
+    text-align: center;
+  }
+
+  .rules-strip p {
+    max-width: 700px;
+    margin: 0 auto;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--text);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: #050710;
+    border-top: 1px solid rgba(201,146,42,0.12);
+    padding: 60px 5% 40px;
+    text-align: center;
+  }
+
+  .footer-logo {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 2rem;
+    color: var(--gold2);
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-sub {
+    font-size: 0.8rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 2rem;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text2);
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .footer-links a:hover { color: var(--gold); }
+
+  .footer-copy {
+    font-size: 0.82rem;
+    color: rgba(138,127,110,0.5);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .ip-grid { grid-template-columns: 1fr; }
+    .about-inner { grid-template-columns: 1fr; gap: 3rem; }
+    .hero-title { font-size: clamp(3rem, 13vw, 5rem); }
+  }
+
+  /* ── HORIZONTAL MARQUEE ── */
+  .marquee-wrap {
+    overflow: hidden;
+    border-top: 1px solid rgba(201,146,42,0.1);
+    border-bottom: 1px solid rgba(201,146,42,0.1);
+    background: var(--stone);
+    padding: 14px 0;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    width: max-content;
+    animation: marquee 25s linear infinite;
+  }
+  .marquee-item {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+  .marquee-item span { color: var(--gold); margin: 0 0.8rem; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    EVERSE SMP
+    <span>Minecraft Server</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#server">Server</a></li>
+    <li><a href="#features">Fitur</a></li>
+    <li><a href="#about">Tentang</a></li>
+  </ul>
+  <a class="nav-btn" href="#server">Bergabung</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-badge">⚔ Minecraft Java & Bedrock Edition</div>
+  <h1 class="hero-title">
+    <span class="accent">Everse</span> SMP
+    <span class="sub">RPG · Politik · Pemerintahan</span>
+  </h1>
+  <p class="hero-desc">
+    Dunia baru menanti. Bangun kerajaan, taklukkan musuh, bentuk pemerintahan — dan tuliskan sejarahmu sendiri.
+  </p>
+  <div class="hero-actions">
+    <a class="btn-primary" href="#server">Lihat Info Server</a>
+    <a class="btn-secondary" href="#features">Fitur Unggulan</a>
+  </div>
+  <div class="scroll-hint">
+    <div class="line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item">Voice Chat<span>✦</span></div>
+    <div class="marquee-item">Claim Land<span>✦</span></div>
+    <div class="marquee-item">Grup Message<span>✦</span></div>
+    <div class="marquee-item">Mata Uang<span>✦</span></div>
+    <div class="marquee-item">RPG System<span>✦</span></div>
+    <div class="marquee-item">Politik & Pemerintahan<span>✦</span></div>
+    <div class="marquee-item">Duduk<span>✦</span></div>
+    <div class="marquee-item">Java & Bedrock<span>✦</span></div>
+    <!-- duplicate for seamless loop -->
+    <div class="marquee-item">Voice Chat<span>✦</span></div>
+    <div class="marquee-item">Claim Land<span>✦</span></div>
+    <div class="marquee-item">Grup Message<span>✦</span></div>
+    <div class="marquee-item">Mata Uang<span>✦</span></div>
+    <div class="marquee-item">RPG System<span>✦</span></div>
+    <div class="marquee-item">Politik & Pemerintahan<span>✦</span></div>
+    <div class="marquee-item">Duduk<span>✦</span></div>
+    <div class="marquee-item">Java & Bedrock<span>✦</span></div>
+  </div>
+</div>
+
+<!-- SERVER INFO -->
+<section id="server" class="ip-section">
+  <div style="max-width:800px; margin:0 auto; text-align:center; position:relative;">
+    <div class="section-label">Cara Bergabung</div>
+    <h2 class="section-title" style="font-size:clamp(1.6rem,4vw,2.8rem);">Koneksi ke Server</h2>
+    <p style="color:var(--text2); max-width:500px; margin:0 auto; font-style:italic;">Server kami mendukung Java Edition maupun Bedrock Edition. Masukkan IP dan Port berikut di launcher Minecraft-mu.</p>
+
+    <div class="ip-grid">
+      <div class="ip-card">
+        <div class="ip-card-label">Server IP</div>
+        <div class="ip-card-value">— — —</div>
+        <div class="ip-card-note">Alamat server utama</div>
+        <div class="coming-soon-badge">Coming Soon</div>
+      </div>
+      <div class="ip-card">
+        <div class="ip-card-label">Port</div>
+        <div class="ip-card-value">— — —</div>
+        <div class="ip-card-note">Port koneksi</div>
+        <div class="coming-soon-badge">Coming Soon</div>
+      </div>
+    </div>
+
+    <div class="platform-row">
+      <div class="platform-pill"><div class="dot"></div> Java Edition</div>
+      <div class="platform-pill"><div class="dot"></div> Bedrock Edition</div>
+    </div>
+  </div>
+</section>
+
+<div class="ornament">— ✦ —</div>
+
+<!-- FEATURES -->
+<section id="features" class="features-section">
+  <div class="features-header">
+    <div class="section-label">Yang Menanti Kamu</div>
+    <h2 class="section-title">Fitur Unggulan</h2>
+    <p style="color:var(--text2); font-style:italic;">Pengalaman bermain yang tak sekedar survival — lebih dalam, lebih hidup, lebih nyata.</p>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon">🎙️</span>
+      <div class="feature-name">Voice Chat</div>
+      <div class="feature-desc">Bicara langsung dengan pemain lain secara real-time. Rasakan immersion penuh saat berdiplomasi, bertempur, atau sekadar ngobrol di warung.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">⚔️</span>
+      <div class="feature-name">Sistem RPG</div>
+      <div class="feature-desc">Level karakter, skill tree, quest, dan loot. Setiap pemain memiliki jalurnya sendiri — menjadi prajurit, pedagang, atau penyihir.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🏛️</span>
+      <div class="feature-name">Politik & Pemerintahan</div>
+      <div class="feature-desc">Dirikan kerajaan, bentuk koalisi, buat undang-undang. Kekuasaan tidak datang dari kekuatan saja — tapi dari strategi dan diplomasi.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">💬</span>
+      <div class="feature-name">Grup Message</div>
+      <div class="feature-desc">Chat rahasia hanya untuk anggota grupmu. Rencanakan strategi, koordinasi serangan, atau sekadar bergosip tanpa diketahui musuh.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🏡</span>
+      <div class="feature-name">Claim Land</div>
+      <div class="feature-desc">Klaim wilayahmu dan lindungi dari penyusup. Perluas kekuasaanmu selangkah demi selangkah hingga membentuk negeri yang megah.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">💰</span>
+      <div class="feature-name">Mata Uang</div>
+      <div class="feature-desc">Ekonomi server yang hidup. Dagang, investasi, bangun bisnis, atau monopoli pasar. Uang adalah kekuatan di dunia Everse.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🪑</span>
+      <div class="feature-name">Duduk</div>
+      <div class="feature-desc">Istirahat di bangku, tangga, atau log kayu. Detail kecil yang membuat dunia terasa jauh lebih hidup dan nyaman.</div>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔄</span>
+      <div class="feature-name">Java & Bedrock</div>
+      <div class="feature-desc">Main dari PC, mobile, maupun konsol. Semua platform bisa bergabung dalam satu server yang sama tanpa hambatan.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="about-section">
+  <div class="about-inner">
+    <div class="about-text">
+      <div class="section-label">Tentang Everse SMP</div>
+      <h2 class="section-title">Lebih dari Sekedar Survival</h2>
+      <p>Everse SMP adalah server Minecraft yang menggabungkan elemen RPG klasik dengan sistem politik dan pemerintahan yang kompleks. Di sini, setiap keputusan memiliki konsekuensi.</p>
+      <p>Bergabunglah sebagai rakyat biasa, naiki tangga kekuasaan, atau robohkan yang ada dan bangun tatanan baru. Sejarah dunia ini ditulis oleh para pemainnya.</p>
+      <p style="font-style:italic; color:var(--text2);">"Di Everse, sword-mu tajam — tapi lidahmu bisa lebih tajam lagi."</p>
+    </div>
+    <div class="about-stats">
+      <div class="stat-box">
+        <div class="stat-number">2</div>
+        <div class="stat-label">Platform</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">8+</div>
+        <div class="stat-label">Fitur Unik</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">RPG</div>
+        <div class="stat-label">Tema Utama</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-number">∞</div>
+        <div class="stat-label">Kemungkinan</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RULES STRIP -->
+<div class="rules-strip">
+  <div class="section-label" style="margin-bottom:1rem;">Ingat Selalu</div>
+  <p>"Hormati sesama pemain, jaga sportivitas, dan ciptakan pengalaman yang menyenangkan untuk semua. Everse adalah dunia bersama — jaga dengan baik."</p>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">EVERSE</div>
+  <div class="footer-sub">SMP · RPG & Politik · Java & Bedrock</div>
+  <div class="footer-links">
+    <a href="#server">Server Info</a>
+    <a href="#features">Fitur</a>
+    <a href="#about">Tentang</a>
+  </div>
+  <div class="footer-copy">© 2025 Everse SMP. Semua hak dilindungi. Bukan afiliasi dari Mojang Studios.</div>
+</footer>
+
+</body>
+</html>
